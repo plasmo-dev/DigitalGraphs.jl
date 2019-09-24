@@ -1,22 +1,23 @@
-# Priority of signals this node produces
-mutable struct ComputeNode <: AbstractComputeNode  #A Dispatch node
-    basenode::BasePlasmoNode
-    state_manager::StateManager                      # Underlying state manager
+mutable struct ComputeNode <: AbstractComputeNode
+    #basenode::BasePlasmoNode
+    index::Int64
 
-    attributes::Vector{NodeAttribute}                # All node computing attributes
-    attribute_map::Dict{Symbol,NodeAttribute}        # map for referencing
+    state_manager::StateManager                              # Underlying state manager
 
-    node_tasks::Vector{NodeTask}                     # Compute Tasks this node can run
-    node_task_map::Dict{Symbol,NodeTask}             # map for referencing
+    attributes::Vector{NodeAttribute}                       # All node computing attributes
+    attribute_map::Dict{Symbol,NodeAttribute}                # map for referencing
 
-    task_result_attributes::Dict{NodeTask,NodeAttribute} # Result attribute for a task
+    node_tasks::Vector{NodeTask}                            # Compute Tasks this node can run
+    node_task_map::Dict{Symbol,NodeTask}                    # map for referencing
+
+    task_result_attributes::Dict{NodeTask,NodeAttribute}    # Result attribute for a task
 
     attribute_triggers::Dict{Signal,NodeTask}
 
-    local_attributes_updated::Vector{NodeAttribute}      # attributes with updated local values
+    local_attributes_updated::Vector{NodeAttribute}         # attributes with updated local values
 
-    task_queue::DataStructures.Queue{NodeTask}          # Node contains a queue of tasks to execute
-    suspend_queue::DataStructures.Queue{NodeTask}       # Queue of tasks that can be resumed
+    task_queue::DataStructures.Queue{NodeTask}              # Node contains a queue of tasks to execute
+    suspend_queue::DataStructures.Queue{NodeTask}           # Queue of tasks that can be resumed
 
     history::Vector{Tuple}
 
@@ -48,20 +49,33 @@ mutable struct ComputeNode <: AbstractComputeNode  #A Dispatch node
         return node
     end
 end
-PlasmoGraphBase.create_node(graph::ComputingGraph) = ComputeNode()
 
 #Dispatch node runs when it gets communication updates
-function addnode!(graph::ComputingGraph)#;continuous = false)
-    node = add_node!(graph)
+# function addnode!(graph::ComputingGraph)#;continuous = false)
+#     node = add_node!(graph)
+#
+#     #error
+#     addtransition!(node,state_any(),signal_error(),state_error())   #action --> cancel signals
+#
+#     #inactive
+#     addtransition!(node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
+#     #addtransition!(node,state_any(),signal_inactive(),state_inactive())  #action --> cancel signals
+#     return node
+# end
+function add_node!(graph::ComputingGraph)
+    vertex = add_node!(graph.multigraph)
+    compute_node = ComputeNode()
+    graph.compute_nodes[vertex] = compute_node
 
-    #error
     addtransition!(node,state_any(),signal_error(),state_error())   #action --> cancel signals
 
     #inactive
-    #addtransition!(node,state_any(),signal_inactive(),state_inactive())  #action --> cancel signals
     addtransition!(node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
-    return node
+
+    return compute_node
 end
+getnode(graph::ComputingGraph,index::Int64) = graph.compute_nodes[index]
+
 
 #addtransition!(node::ComputeNode,state1::State,signal::AbstractSignal,state2::State;action::Union{Nothing,NodeAction} = nothing) = addtransition!(node.state_manager,state1,signal,state2,action = action)
 

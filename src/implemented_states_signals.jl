@@ -4,13 +4,13 @@ state_error() = State(:error)
 state_inactive() = State(:inactive)
 
 
-#Node States
+#Compute Node States
 state_executing() = State(:executing,:nothing)
 state_executing(task::NodeTask) = State(:executing,task)
 state_finalizing() = State(:finalizing,:nothing)
 state_finalizing(task::NodeTask) = State(:finalizing,task)
 
-#Node Signals
+#Compute Node Signals
 signal_error() = Signal(:error)
 signal_error(task::NodeTask) = Signal(:error,task)
 signal_inactive() = Signal(:inactive)
