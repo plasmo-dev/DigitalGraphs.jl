@@ -4,8 +4,8 @@
 mutable struct ComputingGraph <: AbstractComputingGraph
     #basegraph::BasePlasmoGraph
     multigraph::MultiGraph
-    compute_nodes::Dict{Int64,ComputeNode}
-    comm_edges::Dict{MultiEdge,CommunicationEdge}
+    compute_nodes::Dict{Int64,AbstractComputeNode}
+    comm_edges::Dict{MultiEdge,AbstractCommunicationEdge}
     signalqueue::SignalQueue
     history_on::Bool
 end
@@ -15,8 +15,8 @@ function ComputingGraph()
     #signal_priority_order =[signal_finalize(),signal_back_to_idle(),signal_receive(),signal_updated(),signal_sent(),signal_received(),signal_communicate(),signal_execute()]
 
     multigraph = MultiGraph()
-    compute_nodes = Dict{Int64,ComputeNode}()
-    comm_edges = Dict{MultiEdge,CommunicationEdge}()
+    compute_nodes = Dict{Int64,AbstractComputeNode}()
+    comm_edges = Dict{MultiEdge,AbstractCommunicationEdge}()
     signal_priority_order =[signal_finalize(),signal_updated(),signal_back_to_idle(),signal_sent(),signal_received(),signal_communicate(),signal_receive(),signal_execute()]
     signalqueue = SignalQueue()
     signalqueue.signal_priority_order = signal_priority_order

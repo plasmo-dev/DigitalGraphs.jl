@@ -20,7 +20,7 @@ end
 MultiEdge(p::Pair) = MultiEdge(p.first,p.second,0)
 
 #convert a simple edge to a hyperedge
-MultiEdge(edge::SimpleEdge) = MultiEdge(src(edge),dst(edge),0)
+MultiEdge(edge::LightGraphs.SimpleEdge) = MultiEdge(src(edge),dst(edge),0)
 MultiEdge(edge::MultiEdge) = edge
 MultiEdge(src::Int,dst::Int) = MultiEdge(src,dst,0)
 
@@ -72,7 +72,7 @@ function LightGraphs.add_edge!(g::MultiGraph,src::Int,dst::Int)
     return medge
 end
 
-function LightGraphs.add_edge!(g::MultiGraph,edge::SimpleEdge)
+function LightGraphs.add_edge!(g::MultiGraph,edge::LightGraphs.SimpleEdge)
     medge = MultiEdge(edge)
     inserted = add_edge!(g,medge)
     return medge
