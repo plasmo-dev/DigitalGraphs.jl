@@ -36,7 +36,8 @@ end
 
 #PlasmoGraphBase.create_edge(graph::ComputingGraph) = CommunicationEdge()   #PlasmoGraphBase edge construction
 
-getstring(edge::AbstractCommunicationEdge) = "Edge "*string(collect(values(edge.baseedge.indices))[1].src)*" -> "*string(collect(values(edge.baseedge.indices))[1].dst)
+#getstring(edge::AbstractCommunicationEdge) = "Edge "*string(collect(values(edge.baseedge.indices))[1].src)*" -> "*string(collect(values(edge.baseedge.indices))[1].dst)
+
 getdelay(edge::AbstractCommunicationEdge) = edge.delay
 getlocaltime(edge::AbstractCommunicationEdge) = edge.local_time
 getstate(edge::AbstractCommunicationEdge) = getstate(edge.state_manager)
@@ -63,7 +64,7 @@ function add_edge!(graph::AbstractComputingGraph,attribute1::NodeAttribute,attri
     #Update the topology
     n1 = getnode(attribute1)
     n2 = getnode(attribute2)
-    medge = add_edge!(graph.multigraph,n1.index,n2.index)
+    medge = LightGraphs.add_edge!(graph.multigraph,n1.index,n2.index)
     comm_edge = CommunicationEdge(medge)
     graph.comm_edges[medge] = comm_edge
 
@@ -132,3 +133,12 @@ end
 function removecomputeattribute!(edge::CommunicationEdge,attribute::EdgeAttribute)
     filter!(x->x != attribute,edge.attribute_pipeline)
 end
+
+#getstring(node::ComputeNode) = "Compute Node: $node.index"
+function string(edge::CommunicationEdge)
+    """
+    Communication Edge:
+    """
+end
+print(io::IO, edge::CommunicationEdge) = print(io, string(edge))
+show(io::IO,edge::CommunicationEdge) = print(io,edge)

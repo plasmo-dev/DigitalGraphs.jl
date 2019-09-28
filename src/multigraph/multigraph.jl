@@ -33,19 +33,20 @@ MultiGraph() = MultiGraph(Int[],MultiEdge[],Dict{Int,Vector{MultiEdge}}(),Dict{I
 
 #Add vertices
 function LightGraphs.add_vertex!(g::MultiGraph)
-    (nv(g) + one(Int) <= nv(g)) && return false       # test for overflow
+    (LightGraphs.nv(g) + one(Int) <= LightGraphs.nv(g)) && return false       # test for overflow
     v = length(g.vertices)+1
     push!(g.vertices,v)
     g.node_map_in[v] = AbstractMultiEdge[]
     g.node_map_out[v] = AbstractMultiEdge[]
     return true
 end
+add_node!(g::MultiGraph) = LightGraphs.add_vertex!(g)
 
 Base.reverse(e::MultiEdge) = nothing
 
 # LightGraphs.add_edge!
 function LightGraphs.add_edge!(g::MultiGraph, e::MultiEdge)
-    (e.src in vertices(g) && e.dst in vertices(g)) || return false
+    (e.src in LightGraphs.vertices(g) && e.dst in LightGraphs.vertices(g)) || return false
 
     inserted = begin
         push!(g.node_map_in[e.dst],e)
@@ -68,13 +69,13 @@ end
 
 function LightGraphs.add_edge!(g::MultiGraph,src::Int,dst::Int)
     medge = MultiEdge(src,dst)
-    inserted = add_edge!(g,medge)
+    inserted = LightGraphs.add_edge!(g,medge)
     return medge
 end
 
 function LightGraphs.add_edge!(g::MultiGraph,edge::LightGraphs.SimpleEdge)
     medge = MultiEdge(edge)
-    inserted = add_edge!(g,medge)
+    inserted = LightGraphs.add_edge!(g,medge)
     return medge
 end
 

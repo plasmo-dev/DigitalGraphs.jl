@@ -2,7 +2,6 @@
 # Computing Graph
 #####################################################
 mutable struct ComputingGraph <: AbstractComputingGraph
-    #basegraph::BasePlasmoGraph
     multigraph::MultiGraph
     compute_nodes::Dict{Int64,AbstractComputeNode}
     comm_edges::Dict{MultiEdge,AbstractCommunicationEdge}
@@ -10,8 +9,6 @@ mutable struct ComputingGraph <: AbstractComputingGraph
     history_on::Bool
 end
 function ComputingGraph()
-
-    #basegraph = BasePlasmoGraph(MultiGraph)
     #signal_priority_order =[signal_finalize(),signal_back_to_idle(),signal_receive(),signal_updated(),signal_sent(),signal_received(),signal_communicate(),signal_execute()]
 
     multigraph = MultiGraph()
@@ -82,6 +79,17 @@ call!(graph::ComputingGraph,signal_event::SignalEvent) = call!(graph.signal_queu
 #Queue Signal methods for computing graph
 queuesignal!(graph::ComputingGraph,signal::AbstractSignal,target::SignalTarget,time::Number;source = nothing) =
                     queuesignal!(getsignalqueue(graph),signal,target,time,source = source,priority = getlocaltime(target))
+
+#getstring(node::ComputeNode) = "Compute Node: $node.index"
+function string(graph::ComputingGraph)
+    """
+    Computing Graph
+    """
+end
+print(io::IO, graph::ComputingGraph) = print(io, string(graph))
+show(io::IO,graph::ComputingGraph) = print(io,graph)
+
+
 
 
 #queuesignal!(graph::ComputingGraph,signal::Signal,source::ComputeNode,target::ComputeNode,time::Number) = queuesignal!(getsignalqueue(graph),signal,source,target,time,priority = getlocaltime(target))

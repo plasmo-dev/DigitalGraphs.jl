@@ -24,8 +24,11 @@ mutable struct ComputeNode <: AbstractComputeNode
     local_time::Float64
 
     function ComputeNode()
+        # node = new()
+        # node.basenode = BasePlasmoNode()
+
         node = new()
-        node.basenode = BasePlasmoNode()
+        node.index = 0
         node.state_manager = StateManager()
 
         node.attributes = Vector{NodeAttribute}()
@@ -63,14 +66,17 @@ end
 #     return node
 # end
 function add_node!(graph::ComputingGraph)
-    vertex = add_node!(graph.multigraph)
+    add_node!(graph.multigraph)
     compute_node = ComputeNode()
-    graph.compute_nodes[vertex] = compute_node
+    index = length(graph.multigraph.vertices)
+    compute_node.index = index
 
-    addtransition!(node,state_any(),signal_error(),state_error())   #action --> cancel signals
+    graph.compute_nodes[index] = compute_node
+
+    addtransition!(compute_node,state_any(),signal_error(),state_error())   #action --> cancel signals
 
     #inactive
-    addtransition!(node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
+    addtransition!(compute_node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
 
     return compute_node
 end
@@ -176,7 +182,7 @@ function setglobalvalue(node::ComputeNode,label::Symbol,value::Any)
     attribute.global_value = value
 end
 
-getstring(node::ComputeNode) = "Compute Node: "*string(collect(values(node.basenode.indices))[1])
+
 
 getnodetasks(node::ComputeNode) = node.node_tasks
 getnodetask(node::ComputeNode,label::Symbol) = node.node_task_map[label]
@@ -205,8 +211,8 @@ getcurrentstate(node::AbstractComputeNode) = getcurrentstate(node.state_manager)
 function Base.getindex(node::ComputeNode,sym::Symbol)
     if sym in keys(node.attribute_map)
         return getcomputeattribute(node,sym)
-    elseif sym in keys(node.basenode.attributes)
-        return getattribute(node,sym)
+    #elseif sym in keys(node.basenode.attributes)
+    #    return getattribute(node,sym)
     else
         error("node does not have attribute $sym")
     end
@@ -215,12 +221,26 @@ end
 function Base.setindex!(node::ComputeNode,value::Any,sym::Symbol)
     if sym in keys(node.attribute_map)
         setvalue(node.attribute_map[sym],value)
-    elseif sym in keys(node.basenode.attributes)
-        return setattribute(node,sym,value)
+    #elseif sym in keys(node.basenode.attributes)
+    #    return setattribute(node,sym,value)
     else
         node.basenode.attributes[sym] = value
     end
 end
+
+
+#getstring(node::ComputeNode) = "Compute Node: $node.index"
+function string(node::ComputeNode)
+    """
+    Compute Node:$(node.index)
+    """
+end
+print(io::IO, node::ComputeNode) = print(io, string(node))
+show(io::IO,node::ComputeNode) = print(io,node)
+
+
+
+
 
 # #execute if in idle
 # addtransition!(node,state_idle(),signal,state_executing(node_task), action = action_execute_node_task(node_task)
