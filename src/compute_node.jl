@@ -233,6 +233,9 @@ function Base.setindex!(node::ComputeNode,value::Any,sym::Symbol)
 end
 
 #add data
+function getattribute(node::ComputeNode,attribute::Symbol)
+    return node.ext[attribute]
+end
 function setattribute(node::ComputeNode,attribute::Symbol,value)
     node.ext[attribute] = value
 end

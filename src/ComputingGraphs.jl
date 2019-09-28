@@ -31,7 +31,7 @@ addnodetask!,getnodetask,getnodetasks,setcomputetime,getnoderesult,
 addcomputeattribute!,getcomputeattribute,getcomputeattributes,getlocalvalue,getglobalvalue,getvalue,setvalue,
 
 #Compute Nodes
-add_node!,addtasktrigger!,setattribute,addattributes!,
+add_node!,addtasktrigger!,getattribute,setattribute,addattributes!,
 
 #Communication Edges
 addedge!,setdelay,getdelay,iscommunicating,connect!,
