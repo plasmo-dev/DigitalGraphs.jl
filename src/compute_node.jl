@@ -1,5 +1,4 @@
 mutable struct ComputeNode <: AbstractComputeNode
-    #basenode::BasePlasmoNode
     index::Int64
 
     state_manager::StateManager                              # Underlying state manager
@@ -26,8 +25,6 @@ mutable struct ComputeNode <: AbstractComputeNode
     ext::Dict{Any,Any}
 
     function ComputeNode()
-        # node = new()
-        # node.basenode = BasePlasmoNode()
 
         node = new()
         node.index = 0
@@ -228,7 +225,7 @@ function Base.setindex!(node::ComputeNode,value::Any,sym::Symbol)
     elseif sym in keys(node.ext)
        return setattribute(node,sym,value)
     else
-        node.basenode.attributes[sym] = value
+        node.ext[sym] = value
     end
 end
 
