@@ -23,6 +23,8 @@ mutable struct ComputeNode <: AbstractComputeNode
 
     local_time::Float64
 
+    ext::Dict{Any,Any}
+
     function ComputeNode()
         # node = new()
         # node.basenode = BasePlasmoNode()
@@ -47,6 +49,8 @@ mutable struct ComputeNode <: AbstractComputeNode
 
         node.history =  Vector{Tuple}()
         node.local_time = Float64(0)
+
+        node.ext = Dict{Any,Any}()
         addstates!(node,[state_idle(),state_error(),state_inactive()])
         setstate(node,state_idle())
         return node
@@ -211,8 +215,8 @@ getcurrentstate(node::AbstractComputeNode) = getcurrentstate(node.state_manager)
 function Base.getindex(node::ComputeNode,sym::Symbol)
     if sym in keys(node.attribute_map)
         return getcomputeattribute(node,sym)
-    #elseif sym in keys(node.basenode.attributes)
-    #    return getattribute(node,sym)
+    elseif sym in keys(node.ext)
+       return getattribute(node,sym)
     else
         error("node does not have attribute $sym")
     end
@@ -221,13 +225,20 @@ end
 function Base.setindex!(node::ComputeNode,value::Any,sym::Symbol)
     if sym in keys(node.attribute_map)
         setvalue(node.attribute_map[sym],value)
-    #elseif sym in keys(node.basenode.attributes)
-    #    return setattribute(node,sym,value)
+    elseif sym in keys(node.ext)
+       return setattribute(node,sym,value)
     else
         node.basenode.attributes[sym] = value
     end
 end
 
+#add data
+function setattribute(node::ComputeNode,attribute::Symbol,value)
+    node.ext[attribute] = value
+end
+function addattributes!(node::ComputeNode,dict::Dict)
+    merge!(node.ext,dict)
+end
 
 #getstring(node::ComputeNode) = "Compute Node: $node.index"
 function string(node::ComputeNode)
