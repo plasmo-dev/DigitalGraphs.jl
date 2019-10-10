@@ -1,8 +1,9 @@
 mutable struct ComputeNode <: AbstractComputeNode
+
+    graph::Union{Nothing,ComputingGraph}                                   #Reference back graph.  Graph can contain shared information.
     index::Int64
 
-    state_manager::StateManager                              # Underlying state manager
-
+    state_manager::StateManager                             # Underlying state manager
     attributes::Vector{NodeAttribute}                       # All node computing attributes
     attribute_map::Dict{Symbol,NodeAttribute}                # map for referencing
 
@@ -27,6 +28,8 @@ mutable struct ComputeNode <: AbstractComputeNode
     function ComputeNode()
 
         node = new()
+
+        node.graph = nothing
         node.index = 0
         node.state_manager = StateManager()
 
@@ -71,6 +74,7 @@ function add_node!(graph::ComputingGraph)
     compute_node = ComputeNode()
     index = length(graph.multigraph.vertices)
     compute_node.index = index
+    compute_node.graph = graph
 
     graph.compute_nodes[index] = compute_node
 

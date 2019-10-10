@@ -84,6 +84,8 @@ queuesignal!(graph::ComputingGraph,signal::AbstractSignal,target::SignalTarget,t
 function string(graph::ComputingGraph)
     """
     Computing Graph
+    Compute Nodes: $(length(graph.compute_nodes))
+    Communication Edges: $(length(graph.comm_edges))
     """
 end
 print(io::IO, graph::ComputingGraph) = print(io, string(graph))
