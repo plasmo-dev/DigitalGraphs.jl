@@ -1,11 +1,10 @@
 module ComputingGraphs
 
-using StructureGraphs
-import StructureGraphs:create_node,create_edge,add_edge!,addattributes!
-
+# using StructureGraphs
+# import StructureGraphs:create_node,create_edge,add_edge!,addattributes!
+import LightGraphs
 import DataStructures
 import Base:isless,step,==,show,print,string,getindex
-
 
 export AbstractSignal,SerialExecutor,
 
@@ -32,7 +31,7 @@ addnodetask!,getnodetask,getnodetasks,setcomputetime,getnoderesult,
 addcomputeattribute!,getcomputeattribute,getcomputeattributes,getlocalvalue,getglobalvalue,getvalue,setvalue,
 
 #Compute Nodes
-addnode!,addtasktrigger!,
+add_node!,addtasktrigger!,getattribute,setattribute,addattributes!,
 
 #Communication Edges
 addedge!,setdelay,getdelay,iscommunicating,connect!,
@@ -46,9 +45,9 @@ signal_communicate,signal_all_received,signal_updated,signal_received,signal_sen
 
 state_idle,state_any,state_inactive
 
-abstract type AbstractComputingGraph <: AbstractPlasmoGraph end
-abstract type AbstractComputeNode <: AbstractPlasmoNode end
-abstract type AbstractCommunicationEdge  <: AbstractPlasmoEdge end
+abstract type AbstractComputingGraph end #<: AbstractPlasmoGraph end
+abstract type AbstractComputeNode end #<: AbstractPlasmoNode end
+abstract type AbstractCommunicationEdge  end # <: AbstractPlasmoEdge end
 
 abstract type AbstractAttribute end
 abstract type AbstractSignalEvent end
@@ -67,6 +66,8 @@ include("state_manager/signal_executor.jl")
 include("state_manager/print.jl")
 
 #Computing Graph Interface
+
+include("multigraph/multigraph.jl")
 
 #Node Tasks
 include("node_tasks.jl")

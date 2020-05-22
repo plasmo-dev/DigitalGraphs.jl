@@ -1,9 +1,9 @@
-using Plasmo
+using ComputingGraphs
 
 function simple_func1(graph::ComputingGraph,count::NodeAttribute,s::String)
     println("Running simple_func1 at t = $(now(graph))")
     println(s)
-    Plasmo.PlasmoComputingGraph.setvalue(count,getlocalvalue(count) + 1)
+    setvalue(count,getlocalvalue(count) + 1)
     return getlocalvalue(count)
 end
 
@@ -16,15 +16,14 @@ end
 graph = ComputingGraph()
 
 #Add the first workflow node
-n1 = addnode!(graph)
+n1 = add_node!(graph)
 #x = addcomputeattribute!(n1,:x,0)
 count = addcomputeattribute!(n1,:count,0)
 task1 = addnodetask!(graph,n1,:run_n1,simple_func1,args = [graph,count,"hello from $n1"],compute_time = 1.0,triggered_by = signal_updated(count))
-
-#addtasktrigger!(graph,n1,task1,Finalized(task1))
+#add_trigger!(graph,n1,task1,Finalized(task1))
 
 #Add the second workflow node
-n2 = addnode!(graph)
+n2 = add_node!(graph)
 task2 = addnodetask!(graph,n2,:run_n2,simple_func2,args = [graph,n2])
 addcomputeattribute!(n2,:x)
 addtasktrigger!(graph,n2,task2,signal_received(n2[:x]))

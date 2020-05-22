@@ -1,4 +1,4 @@
-using Plasmo
+using ComputingGraphs
 
 #Create some simple tasks
 function simple_func1(x::String)
@@ -17,11 +17,11 @@ end
 graph = ComputingGraph()
 
 #Add the first graph node
-n1 = addnode!(graph)
+n1 = add_node!(graph)
 task1 = addnodetask!(graph,n1,:task1,simple_func1,args = ["hello from $n1"],compute_time = 1.0)
 
 #Add the second compute node
-n2 = addnode!(graph)
+n2 = add_node!(graph)
 task2 = addnodetask!(graph,n2,:task2,simple_func2,args = [graph,n2])
 x = addcomputeattribute!(n2,:x)
 addtasktrigger!(graph,n2,task2,signal_received(n2[:x]))

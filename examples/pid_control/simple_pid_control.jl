@@ -1,8 +1,8 @@
 #Simple control example with multiple channels, sampling rates, and delays
 using DifferentialEquations
-using Plasmo
+using ComputingGraphs
 using Plots
-pyplot()
+#pyplot()
 
 #A function which solves an ode given a workflow and dispatch node
 function run_ode_simulation(graph::ComputingGraph,node::ComputeNode)
@@ -87,19 +87,19 @@ end
 graph = ComputingGraph()
 
 #Add the node for the ode simulation
-ode_node = addnode!(graph)      #, continuous = true, schedule_delay = 0)   #dispatch node that will reschedule on synchronization
+ode_node = add_node!(graph)      #, continuous = true, schedule_delay = 0)   #dispatch node that will reschedule on synchronization
 addcomputeattribute!(ode_node,:x,0.0)
 addcomputeattribute!(ode_node,:u1,0.0)
 addattributes!(ode_node,Dict(:x0 => 0.0,:x_history => Vector{Pair}()))
-sim_task = addnodetask!(graph,ode_node,:run_simulation,run_ode_simulation,args = [graph,ode_node],triggered_by = signal_updated(ode_node[:x]))  #this will make the task run continuously
+sim_task = add_nodetask!(graph,ode_node,:run_simulation,run_ode_simulation,args = [graph,ode_node],triggered_by = signal_updated(ode_node[:x]))  #this will make the task run continuously
 queuesignal!(graph,signal_execute(sim_task),ode_node,0)
 
 #Add the node to do PID calculation
-pid_node1 = addnode!(graph)
+pid_node1 = add_node!(graph)
 addcomputeattribute!(pid_node1,:u,0)
 addcomputeattribute!(pid_node1,:y,0)
 addattributes!(pid_node1,Dict(:yset => 2,:K=>15,:tauI=>1,:tauD=>0.01,:error_history => Vector{Pair}(),:u_history => Vector{Pair}()))
-addnodetask!(graph,pid_node1,:control_law,calc_pid_controller,args = [graph,pid_node1],triggered_by = signal_received(pid_node1[:y]))#,compute_time = 0.01)
+add_nodetask!(graph,pid_node1,:control_law,calc_pid_controller,args = [graph,pid_node1],triggered_by = signal_received(pid_node1[:y]))#,compute_time = 0.01)
 
 #e1 will continuously send x --> y (every 0.01 time units)
 e1 = connect!(graph,ode_node[:x],pid_node1[:y],delay = 0.01,send_on = signal_sent(ode_node[:x]),send_delay = 0.01)

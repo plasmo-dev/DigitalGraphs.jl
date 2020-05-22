@@ -1,30 +1,36 @@
-# Priority of signals this node produces
-mutable struct ComputeNode <: AbstractComputeNode  #A Dispatch node
-    basenode::BasePlasmoNode
-    state_manager::StateManager                      # Underlying state manager
+mutable struct ComputeNode <: AbstractComputeNode
 
-    attributes::Vector{NodeAttribute}                # All node computing attributes
-    attribute_map::Dict{Symbol,NodeAttribute}        # map for referencing
+    graph::Union{Nothing,ComputingGraph}                                   #Reference back graph.  Graph can contain shared information.
+    index::Int64
 
-    node_tasks::Vector{NodeTask}                     # Compute Tasks this node can run
-    node_task_map::Dict{Symbol,NodeTask}             # map for referencing
+    state_manager::StateManager                             # Underlying state manager
+    attributes::Vector{NodeAttribute}                       # All node computing attributes
+    attribute_map::Dict{Symbol,NodeAttribute}                # map for referencing
 
-    task_result_attributes::Dict{NodeTask,NodeAttribute} # Result attribute for a task
+    node_tasks::Vector{NodeTask}                            # Compute Tasks this node can run
+    node_task_map::Dict{Symbol,NodeTask}                    # map for referencing
+
+    task_result_attributes::Dict{NodeTask,NodeAttribute}    # Result attribute for a task
 
     attribute_triggers::Dict{Signal,NodeTask}
 
-    local_attributes_updated::Vector{NodeAttribute}      # attributes with updated local values
+    local_attributes_updated::Vector{NodeAttribute}         # attributes with updated local values
 
-    task_queue::DataStructures.Queue{NodeTask}          # Node contains a queue of tasks to execute
-    suspend_queue::DataStructures.Queue{NodeTask}       # Queue of tasks that can be resumed
+    task_queue::DataStructures.Queue{NodeTask}              # Node contains a queue of tasks to execute
+    suspend_queue::DataStructures.Queue{NodeTask}           # Queue of tasks that can be resumed
 
     history::Vector{Tuple}
 
     local_time::Float64
 
+    ext::Dict{Any,Any}
+
     function ComputeNode()
+
         node = new()
-        node.basenode = BasePlasmoNode()
+
+        node.graph = nothing
+        node.index = 0
         node.state_manager = StateManager()
 
         node.attributes = Vector{NodeAttribute}()
@@ -43,25 +49,44 @@ mutable struct ComputeNode <: AbstractComputeNode  #A Dispatch node
 
         node.history =  Vector{Tuple}()
         node.local_time = Float64(0)
+
+        node.ext = Dict{Any,Any}()
         addstates!(node,[state_idle(),state_error(),state_inactive()])
         setstate(node,state_idle())
         return node
     end
 end
-PlasmoGraphBase.create_node(graph::ComputingGraph) = ComputeNode()
 
 #Dispatch node runs when it gets communication updates
-function addnode!(graph::ComputingGraph)#;continuous = false)
-    node = add_node!(graph)
+# function addnode!(graph::ComputingGraph)#;continuous = false)
+#     node = add_node!(graph)
+#
+#     #error
+#     addtransition!(node,state_any(),signal_error(),state_error())   #action --> cancel signals
+#
+#     #inactive
+#     addtransition!(node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
+#     #addtransition!(node,state_any(),signal_inactive(),state_inactive())  #action --> cancel signals
+#     return node
+# end
+function add_node!(graph::ComputingGraph)
+    add_node!(graph.multigraph)
+    compute_node = ComputeNode()
+    index = length(graph.multigraph.vertices)
+    compute_node.index = index
+    compute_node.graph = graph
 
-    #error
-    addtransition!(node,state_any(),signal_error(),state_error())   #action --> cancel signals
+    graph.compute_nodes[index] = compute_node
+
+    addtransition!(compute_node,state_any(),signal_error(),state_error())   #action --> cancel signals
 
     #inactive
-    #addtransition!(node,state_any(),signal_inactive(),state_inactive())  #action --> cancel signals
-    addtransition!(node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
-    return node
+    addtransition!(compute_node,state_idle(),signal_inactive(),state_inactive())  #action --> cancel signals
+
+    return compute_node
 end
+getnode(graph::ComputingGraph,index::Int64) = graph.compute_nodes[index]
+
 
 #addtransition!(node::ComputeNode,state1::State,signal::AbstractSignal,state2::State;action::Union{Nothing,NodeAction} = nothing) = addtransition!(node.state_manager,state1,signal,state2,action = action)
 
@@ -162,7 +187,7 @@ function setglobalvalue(node::ComputeNode,label::Symbol,value::Any)
     attribute.global_value = value
 end
 
-getstring(node::ComputeNode) = "Compute Node: "*string(collect(values(node.basenode.indices))[1])
+
 
 getnodetasks(node::ComputeNode) = node.node_tasks
 getnodetask(node::ComputeNode,label::Symbol) = node.node_task_map[label]
@@ -191,8 +216,8 @@ getcurrentstate(node::AbstractComputeNode) = getcurrentstate(node.state_manager)
 function Base.getindex(node::ComputeNode,sym::Symbol)
     if sym in keys(node.attribute_map)
         return getcomputeattribute(node,sym)
-    elseif sym in keys(node.basenode.attributes)
-        return getattribute(node,sym)
+    elseif sym in keys(node.ext)
+       return getattribute(node,sym)
     else
         error("node does not have attribute $sym")
     end
@@ -201,12 +226,36 @@ end
 function Base.setindex!(node::ComputeNode,value::Any,sym::Symbol)
     if sym in keys(node.attribute_map)
         setvalue(node.attribute_map[sym],value)
-    elseif sym in keys(node.basenode.attributes)
-        return setattribute(node,sym,value)
+    elseif sym in keys(node.ext)
+       return setattribute(node,sym,value)
     else
-        node.basenode.attributes[sym] = value
+        node.ext[sym] = value
     end
 end
+
+#add data
+function getattribute(node::ComputeNode,attribute::Symbol)
+    return node.ext[attribute]
+end
+function setattribute(node::ComputeNode,attribute::Symbol,value)
+    node.ext[attribute] = value
+end
+function addattributes!(node::ComputeNode,dict::Dict)
+    merge!(node.ext,dict)
+end
+
+#getstring(node::ComputeNode) = "Compute Node: $node.index"
+function string(node::ComputeNode)
+    """
+    Compute Node:$(node.index)
+    """
+end
+print(io::IO, node::ComputeNode) = print(io, string(node))
+show(io::IO,node::ComputeNode) = print(io,node)
+
+
+
+
 
 # #execute if in idle
 # addtransition!(node,state_idle(),signal,state_executing(node_task), action = action_execute_node_task(node_task)
