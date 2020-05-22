@@ -1,4 +1,4 @@
-using ComputingGraphs
+using PlasmoCompute
 
 #Create some simple tasks
 function simple_func1(x::String)

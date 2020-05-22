@@ -1,13 +1,11 @@
 #Simple control example with multiple channels, sampling rates, and delays
 using DifferentialEquations
-using ComputingGraphs
+using PlasmoCompute
 using Plots
 #pyplot()
 
 #A function which solves an ode given a workflow and dispatch node
 function run_ode_simulation(graph::ComputingGraph,node::ComputeNode)
-
-
 
     a = 1.01; b1 = 1.0;
 

@@ -1,4 +1,4 @@
-using ComputingGraphs
+using PlasmoCompute
 
 function simple_func1(graph::ComputingGraph,count::NodeAttribute,s::String)
     println("Running simple_func1 at t = $(now(graph))")

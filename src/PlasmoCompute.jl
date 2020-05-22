@@ -1,4 +1,4 @@
-module ComputingGraphs
+module PlasmoCompute
 
 # using StructureGraphs
 # import StructureGraphs:create_node,create_edge,add_edge!,addattributes!
