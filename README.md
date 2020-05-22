@@ -17,5 +17,5 @@ and simulating failures in distributed real-time control systems.
 PlasmoCompute.jl is not yet a registered Julia package.  It can be installed using the following Julia Pkg command.
 ```julia
 using Pkg
-Pkg.add(PackageSpec(url="https://github.com/jalving/PlasmoCompute.jl.git"))
+Pkg.add(PackageSpec(url="https://github.com/zavalab/PlasmoCompute.jl.git"))
 ```
