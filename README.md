@@ -1,4 +1,4 @@
-# PlasmoCompute
+# PlasmoCompute.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://jalving.github.io/ComputingGraphs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jalving.github.io/ComputingGraphs.jl/dev)
